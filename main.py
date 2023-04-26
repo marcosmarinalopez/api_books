@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, jsonify
 import psycopg2
 
 app = Flask(__name__)
@@ -42,5 +42,15 @@ def home():
 
     return home_display
 
+@app.route('/books', methods=['GET'])
+def get_books():
+    conn = fx__get_db()
+    cursor = conn.cursor()
+    cursor.execute("select * from books_table")
+    totalRows = cursor.fetchall()
+    cursor.close()
+    
+    return jsonify(totalRows)
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

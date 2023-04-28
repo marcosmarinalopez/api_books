@@ -109,5 +109,27 @@ def delete_book(id):
     return jsonify({'message':message})
 
 
+
+@app.route('/resources/book/update', methods=['PUT'])
+def update_book():
+    message = "El libro se ha actualizado correctamente"
+    title= request.args['title']
+    year= request.args['year']
+
+    try:
+        conn = fx__get_db()
+        cursor = conn.cursor()
+        cursor.execute('update books_table set year = %s where title = %s', (year,title))
+        conn.commit()
+                
+    except Exception as ex: 
+        conn.rollback()
+        message = "Error al actualizar el libro \r\n" + str(ex)
+    finally:
+        cursor.close()
+    return jsonify({'message':message})
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

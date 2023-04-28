@@ -54,6 +54,7 @@ def get_books():
     return jsonify(totalRows)
 
 
+# hay que meter un body con json
 @app.route('/resources/book/add', methods=['POST'])
 def add_book():
     message = "El libro se ha añadido correctamente"
@@ -63,19 +64,49 @@ def add_book():
     year = book['year']
     title = book['title']
     description = book['description']
+    id_book = book['id']
     conn = fx__get_db()
 
     try:
         conn = fx__get_db()
         cursor = conn.cursor()
-        cursor.execute('insert into books_table (author, year, title, description) values (%s, %s, %s, %s), (author, year, title, description)')
-        cursor.close()
+        cursor.execute('insert into books_table (author, year, title, description, id) values (%s, %s, %s, %s, %s)', (author, year, title, description, id_book))
         conn.commit()
+        cursor.close()
+        
     except Exception as ex: 
         conn.rollback()
-        message = "Error al añadir el libro"
-    
-    return jsonify({message})
+        message = "Error al añadir el libro \r\n" + str(ex)
+    finally:
+        cursor.close()
+    return jsonify({'message':message})
+
+
+# Si quisiéramos añadir un libro desde el código hay que enviar el json
+# body = { "id": 6,
+#     "title": "La Biblia",
+#      "author": "Profetas",
+#      "description": "En el principio creó Dios los cielos y la tierra",
+#      "year": "2022"}
+
+# request.post('htpp://127.0.0.1:5000/resoruces/book/add',json=body)
+
+@app.route('/resources/book/delete/<int:id>', methods=['DELETE'])
+def delete_book(id):
+    message = "El libro se ha borrado correctamente"
+        
+    try:
+        conn = fx__get_db()
+        cursor = conn.cursor()
+        cursor.execute('delete from books_table where id = %s', (id,))
+        conn.commit()
+                
+    except Exception as ex: 
+        conn.rollback()
+        message = "Error al borrar el libro \r\n" + str(ex)
+    finally:
+        cursor.close()
+    return jsonify({'message':message})
 
 
 if __name__ == '__main__':
